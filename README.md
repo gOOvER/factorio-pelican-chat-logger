@@ -24,7 +24,7 @@ The **Pelican Chat Logger** mod captures in-game chat messages and player events
 ## Installation
 
 ### Via Factorio Mod Portal
-1. Search for "Pelican Chat Logger" in the Factorio mod portal
+1. Visit [Pelican Chat Logger on Mod Portal](https://mods.factorio.com/mod/pelican-chat-logger)
 2. Click "Download" to install
 
 ### Manual Installation

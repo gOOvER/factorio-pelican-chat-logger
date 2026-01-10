@@ -3,7 +3,6 @@
 -- Supports both file-based output AND direct RCON responses
 
 local CONFIG = {
-    output_file = "pelican-chat.json",
     max_entries = 100,  -- Keep last 100 messages
     include_system = true,  -- Include join/leave/death messages
     include_commands = false,  -- Don't log commands for security
@@ -81,33 +80,11 @@ local function add_entry(entry_type, player_name, message, color)
     while #storage.chat_log > CONFIG.max_entries do
         table.remove(storage.chat_log, 1)
     end
-    
-    -- Write to file
-    write_chat_file()
 end
 
--- Write chat log to JSON file
-function write_chat_file()
-    init_storage()
-    
-    local json_lines = {}
-    table.insert(json_lines, '[')
-    
-    for i, entry in ipairs(storage.chat_log) do
-        local line = '  ' .. entry_to_json(entry)
-        
-        if i < #storage.chat_log then
-            line = line .. ','
-        end
-        
-        table.insert(json_lines, line)
-    end
-    
-    table.insert(json_lines, ']')
-    
-    local json_content = table.concat(json_lines, '\n')
-    game.write_file(CONFIG.output_file, json_content, false)
-end
+-- NOTE: File output removed in v1.0.1
+-- Factorio 2.0 removed game.write_file()
+-- Use RCON commands (pelican.chat, pelican.status, etc.) to retrieve data
 
 -- Event: Player chat message
 script.on_event(defines.events.on_console_chat, function(event)
@@ -273,11 +250,6 @@ end)
 
 script.on_load(function()
     -- Storage is automatically loaded
-end)
-
--- Periodic save (every 5 seconds = 300 ticks)
-script.on_nth_tick(300, function()
-    write_chat_file()
 end)
 
 -- ============================================
