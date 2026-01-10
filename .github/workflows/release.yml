@@ -24,6 +24,9 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Shallow clone, no git history needed
+          fetch-depth: 1
 
       - name: Update info.json version
         run: |
@@ -42,35 +45,66 @@ jobs:
           MOD_VERSION="${{ inputs.version }}"
           MOD_FOLDER="${MOD_NAME}_${MOD_VERSION}"
           
-          # Create the mod folder structure
+          # Create clean mod folder
           mkdir -p "${MOD_FOLDER}"
           
-          # Copy all mod files (excluding .git and .github)
+          # Copy ONLY required mod files
           cp info.json "${MOD_FOLDER}/"
           cp control.lua "${MOD_FOLDER}/"
           cp -r locale "${MOD_FOLDER}/"
           
-          # Copy optional files if they exist
-          [ -f README.md ] && cp README.md "${MOD_FOLDER}/"
-          [ -f LICENSE ] && cp LICENSE "${MOD_FOLDER}/"
-          [ -f CHANGELOG.md ] && cp CHANGELOG.md "${MOD_FOLDER}/"
-          [ -f changelog.txt ] && cp changelog.txt "${MOD_FOLDER}/"
-          [ -f thumbnail.png ] && cp thumbnail.png "${MOD_FOLDER}/"
+          # Optional: thumbnail for mod portal (keep small!)
+          if [ -f thumbnail.png ]; then
+            # Check thumbnail size (should be < 1MB)
+            THUMB_SIZE=$(stat -c%s "thumbnail.png")
+            if [ "$THUMB_SIZE" -lt 1048576 ]; then
+              cp thumbnail.png "${MOD_FOLDER}/"
+            else
+              echo "WARNING: thumbnail.png too large ($THUMB_SIZE bytes), skipping"
+            fi
+          fi
           
-          # Verify the folder structure
-          echo "=== Folder structure ==="
-          find "${MOD_FOLDER}" -type f
+          # Show folder structure
+          echo "=== Mod folder contents ==="
+          find "${MOD_FOLDER}" -type f -exec ls -lh {} \;
           
-          # Create the ZIP file (Factorio standard format)
-          # Using -r to recurse and preserve folder structure
+          # Calculate folder size
+          FOLDER_SIZE=$(du -sh "${MOD_FOLDER}" | cut -f1)
+          echo ""
+          echo "Total folder size: ${FOLDER_SIZE}"
+          
+          # Create ZIP (without compression artifacts)
+          cd "${MOD_FOLDER}"
+          zip -r "../${MOD_FOLDER}.zip" .
+          cd ..
+          
+          # Wrap in correct folder structure for Factorio
+          rm -rf "${MOD_FOLDER}"
+          mkdir "${MOD_FOLDER}"
+          cd "${MOD_FOLDER}"
+          unzip "../${MOD_FOLDER}.zip"
+          cd ..
+          rm "${MOD_FOLDER}.zip"
           zip -r "${MOD_FOLDER}.zip" "${MOD_FOLDER}"
           
+          # Verify ZIP
           echo ""
-          echo "=== Created: ${MOD_FOLDER}.zip ==="
           echo "=== ZIP Contents ==="
           unzip -l "${MOD_FOLDER}.zip"
           
-          # Verify ZIP structure is correct (should have modname_version/ as root)
+          # Check ZIP size
+          ZIP_SIZE=$(stat -c%s "${MOD_FOLDER}.zip")
+          ZIP_SIZE_KB=$((ZIP_SIZE / 1024))
+          echo ""
+          echo "=== ZIP size: ${ZIP_SIZE_KB} KB ==="
+          
+          # Warn if ZIP is suspiciously large (> 100KB for this mod)
+          if [ "$ZIP_SIZE" -gt 102400 ]; then
+            echo "WARNING: ZIP is larger than expected (${ZIP_SIZE_KB} KB)"
+            echo "Expected < 100 KB for this mod"
+          fi
+          
+          # Verify structure
           echo ""
           echo "=== Verifying ZIP structure ==="
           FIRST_ENTRY=$(unzip -l "${MOD_FOLDER}.zip" | grep -m1 "info.json" | awk '{print $4}')
