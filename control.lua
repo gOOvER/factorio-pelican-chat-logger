@@ -249,7 +249,24 @@ script.on_init(function()
 end)
 
 script.on_load(function()
-    -- Storage is automatically loaded
+    -- Storage is automatically restored by Factorio
+    -- No initialization needed here
+end)
+
+-- Handle mod updates and configuration changes
+script.on_configuration_changed(function(data)
+    init_storage()
+    
+    local mod_changes = data.mod_changes["pelican-chat-logger"]
+    if mod_changes then
+        -- Mod was updated
+        local old_version = mod_changes.old_version
+        local new_version = mod_changes.new_version
+        
+        if old_version then
+            add_entry("system", "Server", "Pelican Chat Logger updated from " .. old_version .. " to " .. new_version, "blue")
+        end
+    end
 end)
 
 -- ============================================
@@ -294,6 +311,13 @@ commands.add_command("pelican.status", "Get server status (JSON)", function(cmd)
         current_research = string.format('"%s"', json_escape(game.forces["player"].current_research.name))
     end
     
+    -- Safe evolution factor retrieval (property in Factorio 2.0, not a method)
+    local evolution = 0
+    local enemy_force = game.forces["enemy"]
+    if enemy_force then
+        evolution = enemy_force.evolution_factor or 0
+    end
+    
     local status = string.format(
         '{"tick":%d,"time":"%s","players":%d,"player_list":[%s],"current_research":%s,"evolution":%.4f}',
         game.tick,
@@ -301,7 +325,7 @@ commands.add_command("pelican.status", "Get server status (JSON)", function(cmd)
         player_count,
         table.concat(online_players, ','),
         current_research,
-        game.forces["enemy"] and game.forces["enemy"].get_evolution_factor() or 0
+        evolution
     )
     
     rcon.print(status)
@@ -347,7 +371,7 @@ end)
 
 -- /pelican.version - Get mod version
 commands.add_command("pelican.version", "Get mod version", function(cmd)
-    rcon.print('{"name":"pelican-chat-logger","version":"1.0.1","api_version":1}')
+    rcon.print('{"name":"pelican-chat-logger","version":"1.0.2","api_version":1}')
 end)
 
 -- Remote interface for external tools
