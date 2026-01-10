@@ -342,13 +342,12 @@ commands.add_command("pelican.clear", "Clear chat log", function(cmd)
     init_storage()
     storage.chat_log = {}
     storage.message_id = 0
-    write_chat_file()
     rcon.print('{"status":"ok","message":"Chat log cleared"}')
 end)
 
 -- /pelican.version - Get mod version
 commands.add_command("pelican.version", "Get mod version", function(cmd)
-    rcon.print('{"name":"pelican-chat-logger","version":"1.0.0","api_version":1}')
+    rcon.print('{"name":"pelican-chat-logger","version":"1.0.1","api_version":1}')
 end)
 
 -- Remote interface for external tools
@@ -370,7 +369,6 @@ remote.add_interface("pelican_chat_logger", {
         init_storage()
         storage.chat_log = {}
         storage.message_id = 0
-        write_chat_file()
     end,
     
     -- Add server message
