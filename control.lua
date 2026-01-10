@@ -329,7 +329,7 @@ commands.add_command("pelican.status", "Get server status (JSON)", function(cmd)
         player_count,
         table.concat(online_players, ','),
         current_research,
-        game.forces["enemy"] and game.forces["enemy"].get_evolution_factor(game.surfaces[1]) or 0
+        game.forces["enemy"] and game.forces["enemy"].get_evolution_factor() or 0
     )
     
     rcon.print(status)
