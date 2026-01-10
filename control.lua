@@ -400,3 +400,16 @@ remote.add_interface("pelican_chat_logger", {
         add_entry("server", "Server", message, "yellow")
     end
 })
+
+-- Load tests module (optional - only if file exists)
+local function load_tests()
+    local success, err = pcall(function()
+        require("tests")
+    end)
+    if success then
+        -- Tests loaded successfully
+    end
+end
+
+-- Attempt to load tests
+load_tests()
