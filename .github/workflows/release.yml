@@ -57,12 +57,31 @@ jobs:
           [ -f changelog.txt ] && cp changelog.txt "${MOD_FOLDER}/"
           [ -f thumbnail.png ] && cp thumbnail.png "${MOD_FOLDER}/"
           
+          # Verify the folder structure
+          echo "=== Folder structure ==="
+          find "${MOD_FOLDER}" -type f
+          
           # Create the ZIP file (Factorio standard format)
+          # Using -r to recurse and preserve folder structure
           zip -r "${MOD_FOLDER}.zip" "${MOD_FOLDER}"
           
-          echo "Created: ${MOD_FOLDER}.zip"
-          echo "Contents:"
+          echo ""
+          echo "=== Created: ${MOD_FOLDER}.zip ==="
+          echo "=== ZIP Contents ==="
           unzip -l "${MOD_FOLDER}.zip"
+          
+          # Verify ZIP structure is correct (should have modname_version/ as root)
+          echo ""
+          echo "=== Verifying ZIP structure ==="
+          FIRST_ENTRY=$(unzip -l "${MOD_FOLDER}.zip" | grep -m1 "info.json" | awk '{print $4}')
+          if [[ "$FIRST_ENTRY" == "${MOD_FOLDER}/info.json" ]]; then
+            echo "✓ ZIP structure is correct: ${FIRST_ENTRY}"
+          else
+            echo "✗ ERROR: ZIP structure is incorrect!"
+            echo "  Expected: ${MOD_FOLDER}/info.json"
+            echo "  Got: ${FIRST_ENTRY}"
+            exit 1
+          fi
 
       - name: Extract release notes from CHANGELOG
         id: changelog
