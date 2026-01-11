@@ -1,0 +1,80 @@
+name: Publish Factorio Mod
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag to publish (e.g., 1.0.3)'
+        required: true
+        type: string
+
+jobs:
+  publish-mod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Get version from tag
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          # Extract changelog section for this version
+          CHANGELOG=$(awk -v ver="## \\[$VERSION\\]" '
+            $0 ~ ver {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' CHANGELOG.md)
+          # Handle multi-line output
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Validate Mod
+        uses: TheBrutalX/factorio-mod-uploader-action@v2
+        with:
+          action: validate
+          mod-dir: ./
+
+      - name: Compress Mod
+        uses: TheBrutalX/factorio-mod-uploader-action@v2
+        with:
+          action: compress
+          mod-dir: ./
+
+      - name: Upload Mod to Factorio Portal
+        uses: TheBrutalX/factorio-mod-uploader-action@v2
+        with:
+          action: upload
+          mod-dir: ./
+          token: ${{ secrets.FACTORIO_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## Changes in ${{ steps.version.outputs.VERSION }}
+            
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ---
+            Published to [Factorio Mod Portal](https://mods.factorio.com/mod/pelican-chat-logger)
+          files: |
+            *.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
