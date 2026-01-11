@@ -49,20 +49,20 @@ jobs:
         uses: TheBrutalX/factorio-mod-uploader-action@v2
         with:
           action: validate
-          mod-dir: ./
+          mod-folder: ./
 
       - name: Compress Mod
         uses: TheBrutalX/factorio-mod-uploader-action@v2
         with:
           action: compress
-          mod-dir: ./
+          mod-folder: ./
 
       - name: Upload Mod to Factorio Portal
         uses: TheBrutalX/factorio-mod-uploader-action@v2
         with:
           action: upload
-          mod-dir: ./
-          token: ${{ secrets.FACTORIO_TOKEN }}
+          mod-folder: ./
+          factorio-api-key: ${{ secrets.FACTORIO_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
