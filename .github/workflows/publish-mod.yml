@@ -54,6 +54,7 @@ jobs:
           mod-folder: ./
 
       - name: Compress Mod
+        id: compress
         uses: TheBrutalX/factorio-mod-uploader-action@v2
         with:
           action: compress
@@ -86,7 +87,6 @@ jobs:
             
             ---
             Published to [Factorio Mod Portal](https://mods.factorio.com/mod/pelican-chat-logger)
-          files: |
-            *.zip
+          files: ${{ env.ZIP_FILE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
