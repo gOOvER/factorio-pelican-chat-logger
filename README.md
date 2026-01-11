@@ -4,7 +4,7 @@ A Factorio mod that logs chat messages and player events for integration with [P
 
 ## Overview
 
-The **Pelican Chat Logger** mod captures in-game chat messages and player events, providing them via RCON commands in JSON format. This enables the [Factorio RCON Manager](https://github.com/gOOvER/pelican-factorio-rcon) plugin to display chat history and extended server status in the Pelican Panel.
+The **Pelican Chat Logger** mod captures in-game chat messages and player events, providing them via RCON commands in JSON format. This enables the [Factorio Manager](https://github.com/gOOvER/pelican-factorio-manager) plugin to display chat history and extended server status in the Pelican Panel.
 
 ## Features
 
@@ -166,9 +166,9 @@ remote.call("pelican_chat_logger", "server_message", "Hello from another mod!")
 
 ## Integration with Pelican Panel
 
-This mod is designed to work with the **Factorio RCON Manager** plugin for Pelican Panel:
+This mod is designed to work with the **Factorio Manager** plugin for Pelican Panel:
 
-🔗 **[Factorio RCON Manager](https://github.com/gOOvER/pelican-factorio-rcon)**
+🔗 **[Factorio Manager](https://github.com/gOOvER/pelican-factorio-manager)**
 
 The plugin uses the RCON commands provided by this mod to display:
 - Real-time chat history in the panel
@@ -187,4 +187,4 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 - [GitHub Repository](https://github.com/gOOvER/factorio-pelican-chat-logger)
 - [Pelican Panel](https://pelican.dev/)
-- [Factorio RCON Manager Plugin](https://github.com/gOOvER/pelican-factorio-rcon)
+- [Factorio Manager Plugin](https://github.com/gOOvER/pelican-factorio-manager)
