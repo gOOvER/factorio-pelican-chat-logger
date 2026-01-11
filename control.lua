@@ -112,9 +112,16 @@ commands.add_command("pelican.status", "Get server status (tick, time, players, 
         research = '"' .. esc(force.current_research.name) .. '"'
     end
     
+    -- Evolution factor moved to surface in Factorio 2.0
     local evo = 0
-    local enemy = game.forces["enemy"]
-    if enemy then evo = enemy.evolution_factor or 0 end
+    local surface = game.surfaces[1]
+    if surface and surface.get_enemy_evolution then
+        -- Factorio 2.0+: evolution is per-surface via get_enemy_evolution
+        evo = surface.get_enemy_evolution() or 0
+    elseif surface and surface.enemy_evolution then
+        -- Alternative property name
+        evo = surface.enemy_evolution or 0
+    end
     
     rcon.print(string.format(
         '{"tick":%d,"time":"%s","players":%d,"research":%s,"evolution":%.4f}',
